@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    @AppStorage("nichName") var nickName = ""
     @State var score = 0
+    @State var resultList:[GameResult] = []
+    @AppStorage("nichName") var nickName = ""
+    
     @AppStorage("bestScore") var bestScore = 0
     @AppStorage("bestNickName") var bestNickName = ""
     @State var gameIsInProgress = false
@@ -36,28 +38,52 @@ struct ContentView: View {
                 Image(systemName: "plus.square")
                     .font(.title)
                     .onTapGesture{
-                        score = score + 1
+                        userTouchedClickButton()
                     }
             }
             Spacer()
+            GameResultListView(resultList: resultList)
+            // boutton Pour demarrer la partie
             if gameIsInProgress == false {
                 Button("Nouvelle partie"){
-                    score = 0
-                    gameIsInProgress = true
-                    Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false){(_) in
-                        gameIsInProgress = false
-                        if score > bestScore {
-                            bestScore = score
-                            bestNickName = nickName
-                        }
-                        
-                    }
+                    userTouchedStartButton()
                 }.padding()
             }
+            
+            
         }
         .padding()
+        
+        
     }
+    
+    //fonction qui permet de demarrer la partie
+    func userTouchedStartButton(){
+        score = 0
+        gameIsInProgress = true
+        Timer.scheduledTimer(withTimeInterval: 10.0, repeats: false){(_) in
+            gameDidfinish()
+        }
+    }
+    
+    // fonction aui permet d'incrementer le timer
+    func userTouchedClickButton(){
+        score = score + 1
+    }
+    
+    //fonction pour enregister le meilleur score
+    func gameDidfinish(){
+        gameIsInProgress = false
+        if score > bestScore {
+            bestScore = score
+            bestNickName = nickName
+        }
+        let result:GameResult = GameResult(playerName: nickName, score: score)
+        resultList.append(result)
+    }
+    
 }
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
